@@ -22,7 +22,7 @@ public class BackgroundDownloader : MonoBehaviour
     void Start()
     {
         ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(CheckValidCertificateCallback);
-        var ConnectionString = "DefaultEndpointsProtocol=https;AccountName=mrvirtualtour;AccountKey=QxwukxlyZ3V8K+Xq81bn81l2KDo2zDqqsdIdt5Hg4n6ofhbOyLP2860z8j9vhHDUVPlU9N1woYSdyWB7oc/Khg==;EndpointSuffix=core.windows.net";
+        var ConnectionString = "";
         Statics.sceneName = "Soccer Field";
         var ContainerName = "mrvritualtour-scene1";
         var VideoName = "Building25-01.mp4";
