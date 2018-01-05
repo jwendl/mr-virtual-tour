@@ -1,0 +1,157 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "siteName": {
+      "type": "string"
+    },
+    "hostingPlanName": {
+      "type": "string"
+    },
+    "Location": {
+      "type": "string",
+      "allowedValues": [
+        "Central US",
+        "East Asia",
+        "East US",
+        "Japan East",
+        "Japan West",
+        "North Europe",
+        "South Central US",
+        "Southeast Asia",
+        "West Europe",
+        "West US"
+      ]
+    },
+    "databaseAccountName": {
+      "type": "string"
+    },
+    "storageAccountType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    },
+    "storageAccountName": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-04-08",
+      "type": "Microsoft.DocumentDb/databaseAccounts",
+      "name": "[parameters('databaseAccountName')]",
+      "location": "[parameters('Location')]",
+      "tags": {
+        "displayName": "databaseAccount"
+      },
+      "properties": {
+        "name": "[parameters('databaseAccountName')]",
+        "databaseAccountOfferType": "Standard"
+      }
+    },
+    {
+      "apiVersion": "2014-04-01",
+      "name": "[parameters('hostingPlanName')]",
+      "type": "Microsoft.Web/serverFarms",
+      "location": "[parameters('Location')]",
+      "tags": {
+        "displayName": "hostingPlan"
+      },
+      "properties": {
+        "name": "[parameters('hostingPlanName')]",
+        "sku": "free",
+        "workerSize": "0",
+        "numberOfWorkers": 1
+      }
+    },
+    {
+      "apiVersion": "2014-04-01",
+      "name": "[parameters('siteName')]",
+      "type": "Microsoft.Web/Sites",
+      "location": "[parameters('Location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Web/serverFarms/', parameters('hostingPlanName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('hostingPlanName'))]": "empty",
+        "displayName": "site"
+      },
+      "properties": {
+        "name": "[parameters('siteName')]",
+        "serverFarm": "[parameters('hostingPlanName')]"
+      },
+      "resources": [
+        {
+          "apiVersion": "2014-04-01",
+          "type": "config",
+          "name": "web",
+          "dependsOn": [
+            "[concat('Microsoft.Web/Sites/', parameters('siteName'))]",
+            "[concat('Microsoft.DocumentDb/databaseAccounts/', parameters('databaseAccountName'))]",
+            "[concat('Microsoft.Web/Sites/', parameters('siteName'), '/Extensions/MSDeploy')]"
+          ],
+          "properties": {
+            "connectionStrings": [
+              {
+                "ConnectionString": "[concat(reference(concat('Microsoft.DocumentDb/databaseAccounts/', parameters('databaseAccountName'))).documentEndpoint, '@', listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', parameters('databaseAccountName')), '2015-04-08').primaryMasterKey)]",
+                "Name": "DocDBConnection",
+                "Type": 3
+              }
+            ],
+            "appSettings": [
+              {
+                "Value": "[reference(concat('Microsoft.DocumentDb/databaseAccounts/', parameters('databaseAccountName'))).documentEndpoint]",
+                "Name": "Configuration:DocumentEndpoint"
+              },
+              {
+                "Value": "[listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', parameters('databaseAccountName')), '2015-04-08').primaryMasterKey]",
+                "Name": "Configuration:DocumentKey"
+              },
+              {
+                "Value": "VirtualTour",
+                "Name": "Configuration:DatabaseId"
+              }
+            ]
+          }
+        },
+        {
+          "apiVersion": "2014-04-01",
+          "name": "MSDeploy",
+          "type": "Extensions",
+          "dependsOn": [
+            "[concat('Microsoft.Web/Sites/', parameters('siteName'))]",
+            "[concat('Microsoft.DocumentDb/databaseAccounts/', parameters('databaseAccountName'))]"
+          ],
+          "properties": {
+            "packageUri": "https://portalcontent.blob.core.windows.net/samples/documentdbtodo.zip",
+            "dbType": "None",
+            "connectionString": "",
+            "setParameters": {
+              "IIS Web Application Name": "[parameters('siteName')]"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "[parameters('storageAccountName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-01-01",
+      "sku": {
+        "name": "[parameters('storageAccountType')]"
+      },
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "storageAccount"
+      },
+      "kind": "Storage"
+    }
+  ]
+}
