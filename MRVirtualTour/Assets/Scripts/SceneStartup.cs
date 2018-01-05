@@ -5,7 +5,6 @@ using System.Net;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using VirtualTourApi.Constants;
 using VirtualTourApi.Models;
 
 public class SceneStartup
@@ -35,7 +34,7 @@ public class SceneStartup
 
                 switch (unityPrimitive.PrimativeType)
                 {
-                    case UnityTypes.CapsuleCollider:
+                    case "CapsuleCollider":
                         BuildCollider(unityPrimitive);
                         break;
 
