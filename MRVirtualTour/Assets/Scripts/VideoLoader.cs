@@ -24,7 +24,7 @@ public class VideoLoader : MonoBehaviour
     public void LoadVideo(string containerName, string videoName)
     {
         ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(CheckValidCertificateCallback);
-        var ConnectionString = "DefaultEndpointsProtocol=https;AccountName=mrvirtualtour;AccountKey=QxwukxlyZ3V8K+Xq81bn81l2KDo2zDqqsdIdt5Hg4n6ofhbOyLP2860z8j9vhHDUVPlU9N1woYSdyWB7oc/Khg==;EndpointSuffix=core.windows.net";
+        var ConnectionString = "DefaultEndpointsProtocol=https;AccountName=mrvtstorage;AccountKey=DJIRpiPBk1e0/L7GB0FgOI/A+D3NqNZSdZ3LS1QxYUK8SsJr7MnOz7eQYtIFT347FD8qJehpBwXlDkGJzcJ7PA==;EndpointSuffix=core.windows.net";
         var ContainerName = containerName;
         var VideoName = videoName;
         var StorageAccount = CloudStorageAccount.Parse(ConnectionString);
